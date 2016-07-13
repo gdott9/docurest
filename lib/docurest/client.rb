@@ -1,5 +1,6 @@
 require "json"
 require "net/http"
+require "net/http/post/multipart"
 
 module Docurest
   class Client
@@ -9,14 +10,14 @@ module Docurest
       @env = env
     end
 
-    def delete(url, body, use_base_url: true, parse_json: true)
+    def delete(url, use_base_url: true, parse_json: true, **body)
       request = Net::HTTP::Delete.new build_uri(url, use_base_url),
         {'Content-Type' => 'application/json'}
-      request.body = JSON.generate(body)
+      request.body = JSON.generate(body) unless body.empty?
       query request, parse_json: parse_json
     end
 
-    def get(url, request_query = {}, use_base_url: true, parse_json: true)
+    def get(url, use_base_url: true, parse_json: true, **request_query)
       uri = build_uri(url, use_base_url)
       uri.query = URI.encode_www_form(request_query)
 
@@ -24,17 +25,25 @@ module Docurest
       query request, parse_json: parse_json
     end
 
-    def post(url, body, use_base_url: true, parse_json: true)
-      request = Net::HTTP::Post.new build_uri(url, use_base_url),
-        {'Content-Type' => 'application/json'}
-      request.body = JSON.generate(body)
-      query request, parse_json: parse_json
+    def post(url, **attributes)
+      multipart_query Net::HTTP::Post, url, **attributes
     end
 
-    def put(url, body, use_base_url: true, parse_json: true)
-      request = Net::HTTP::Put.new build_uri(url, use_base_url),
-        {'Content-Type' => 'application/json'}
-      request.body = JSON.generate(body)
+    def put(url, **attributes)
+      multipart_query Net::HTTP::Put, url, **attributes
+    end
+
+    private
+
+    def multipart_query(klass, url, use_base_url: true, parse_json: true, files: {}, **body)
+      uri = build_uri(url, use_base_url)
+      if files.empty?
+        request = klass.new uri, {'Content-Type' => 'application/json'}
+        request.body = JSON.generate(body)
+      else
+        request = klass::Multipart.new uri, {post_body: JSON.generate(body)}.merge(files),
+          {parts: {post_body: {'Content-Type' => 'application/json'}}}
+      end
       query request, parse_json: parse_json
     end
 
@@ -51,8 +60,6 @@ module Docurest
         res.body
       end
     end
-
-    private
 
     def add_authentication_header(request)
     end
