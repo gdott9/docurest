@@ -12,6 +12,13 @@ module Docurest
       end
     end
 
+    def self.save(recipients)
+      Array(recipients).group_by(&:envelope_id).each do |envelope_id, array|
+        next unless envelope_id
+        Docurest.client.put "/envelopes/#{envelope_id}/recipients", Docurest::Base.hash_by_type(array)
+      end
+    end
+
     field :id, :recipientId, :integer
     field :guid, :recipientIdGuid
     field :envelope_id
@@ -24,11 +31,26 @@ module Docurest
     field :type
     field :signed_at, :signedDateTime, :date_time
     field :delivered_at, :deliveredDateTime, :date_time
+    field :email_notification, :emailNotification, ->(value) { Docurest::Envelope::Email.new value }
 
     association(:tabs) { Docurest::Envelope::Recipient::Tab.list(envelope_id, guid) }
 
+    def initialize(attributes = {})
+      @type = :signers
+      super
+    end
+
     def to_h
-      {recipientId: recipientId}
+      {
+        recipientId: recipientId,
+        name: name,
+        email: email,
+        customFields: customFields,
+        emailNotification: email_notification.to_h,
+        routingOrder: routingOrder,
+        note: note,
+        tabs: Docurest::Base.hash_by_type(tabs),
+      }
     end
   end
 end

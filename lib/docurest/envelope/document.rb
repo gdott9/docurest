@@ -2,6 +2,8 @@ module Docurest
   class Envelope::Document < Docurest::Base
     def self.list(envelope_id)
       result = Docurest.client.get "/envelopes/#{envelope_id}/documents"
+      return [] unless result.key?('envelopeDocuments')
+
       result['envelopeDocuments'].map do |doc|
         new doc.merge(envelope_id: envelope_id)
       end
@@ -21,6 +23,11 @@ module Docurest
 
     attr_writer :file
 
+    def initialize(attribute = {})
+      @content = 'application/pdf'
+      super
+    end
+
     def delete
       self.class.delete(envelope_id, [id])
     end
@@ -39,8 +46,12 @@ module Docurest
       end
     end
 
+    def upload
+      ["file#{id}", UploadIO.new(file, content, name, 'Content-Disposition' => "file; documentid=#{id}")]
+    end
+
     def to_h
-      {documentId: documentId}
+      {documentId: documentId, name: name}
     end
   end
 end

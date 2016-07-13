@@ -30,10 +30,22 @@ module Docurest
       end
     end
 
-    def association(klass, &block)
+    def association(klass, parent_field = nil, &block)
+      singular = klass[-1] == 's' ? klass[0..-2] : klass
+
       define_method(klass) do
         instance_variable_get(:"@#{klass}") ||
           instance_variable_set(:"@#{klass}", persisted? ? instance_eval(&block) : [])
+      end
+      define_method("#{klass}=") do |values|
+        values.each { |value| send "add_#{singular}", value }
+      end
+      define_method("add_#{singular}") do |value|
+        values = send(klass)
+
+        value.send("#{parent_field}=", guid) if parent_field
+        value.id = values.length + 1 unless value.id
+        values << value
       end
     end
   end

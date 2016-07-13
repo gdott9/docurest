@@ -10,6 +10,7 @@ require "docurest/base"
 
 require "docurest/envelope"
 require "docurest/envelope/document"
+require "docurest/envelope/email"
 require "docurest/envelope/email_settings"
 require "docurest/envelope/recipient"
 require "docurest/envelope/recipient/tab"

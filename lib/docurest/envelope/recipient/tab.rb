@@ -10,9 +10,11 @@ module Docurest
 
     field :guid
     field :name
+    field :type
     field :tab_label, :tabLabel
     field :scale_value, :scaleValue, :float
     field :optional, nil, :boolean
+    field :required, nil, :boolean
     field :document_id, :documentId
     field :page_number, :pageNumber, :integer
     field :recipient_guid, :recipientId
@@ -23,6 +25,24 @@ module Docurest
     field :anchor_x_offset, :anchorXOffset
     field :anchor_y_offset, :anchorYOffset
     field :anchor_units, :anchorUnits
+
+    def to_h
+      {
+        name: name,
+        tabLabel: tabLabel,
+        scaleValue: scaleValue,
+        optional: optional,
+        required: required,
+        documentId: documentId,
+        pageNumber: pageNumber,
+        xPosition: xPosition,
+        yPosition: yPosition,
+        anchorString: anchorString,
+        anchorXOffset: anchorXOffset,
+        anchorYOffset: anchorYOffset,
+        anchorUnits: anchorUnits,
+      }
+    end
   end
 end
 
