@@ -35,8 +35,10 @@ module Docurest
 
     private
 
-    def multipart_query(klass, url, use_base_url: true, parse_json: true, files: {}, **body)
+    def multipart_query(klass, url, use_base_url: true, parse_json: true, request_query: {}, files: {}, **body)
       uri = build_uri(url, use_base_url)
+      uri.query = URI.encode_www_form(request_query)
+
       if files.empty?
         request = klass.new uri, {'Content-Type' => 'application/json'}
         request.body = JSON.generate(body)

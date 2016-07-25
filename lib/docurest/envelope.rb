@@ -35,8 +35,8 @@ module Docurest
     field :email_settings, :emailSettings, ->(value) { Docurest::Envelope::EmailSettings.new value }
 
     association(:recipients, :envelope_id) { Docurest::Envelope::Recipient.list(guid) }
-    def save_recipients
-      Docurest::Envelope::Recipient.save recipients
+    def save_recipients(resend: false)
+      Docurest::Envelope::Recipient.save recipients, resend: resend
     end
 
     association(:documents, :envelope_id) { Docurest::Envelope::Document.list(guid) }
@@ -58,13 +58,28 @@ module Docurest
       Docurest::Envelope::Document.new(id: document_id, envelope_id: guid).download(file)
     end
 
+    def resend
+      return unless persisted? && %w{sent delivered}.include?(status)
+      Docurest.client.put "/envelopes/#{guid}", {request_query: {resend_envelope: true}}
+    end
+
+    def fire
+      return unless status == 'created'
+
+      if persisted?
+        Docurest.client.put "/envelopes/#{guid}", {status: :sent}
+      else
+        self.status = :sent
+      end
+    end
+
     def void(reason = 'No reason provided.')
       Docurest.client.put "/envelopes/#{guid}", {status: :voided, voidedReason: reason}
     end
 
-    def save
+    def save(resend: false)
       result = if persisted?
-        Docurest.client.put "/envelopes/#{guid}", to_h
+        Docurest.client.put "/envelopes/#{guid}", to_h.merge(request_query: {resend_envelope: resend})
       else
         Docurest.client.post "/envelopes", to_h
       end

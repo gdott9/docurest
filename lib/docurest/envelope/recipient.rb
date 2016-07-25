@@ -12,10 +12,11 @@ module Docurest
       end
     end
 
-    def self.save(recipients)
+    def self.save(recipients, resend: false)
       Array(recipients).group_by(&:envelope_id).each do |envelope_id, array|
         next unless envelope_id
-        Docurest.client.put "/envelopes/#{envelope_id}/recipients", Docurest::Base.hash_by_type(array)
+        Docurest.client.put "/envelopes/#{envelope_id}/recipients",
+          Docurest::Base.hash_by_type(array).merge(request_query: {resend_envelope: resend})
       end
     end
 
@@ -46,11 +47,12 @@ module Docurest
         name: name,
         email: email,
         customFields: customFields,
-        emailNotification: email_notification.to_h,
         routingOrder: routingOrder,
         note: note,
         tabs: Docurest::Base.hash_by_type(tabs),
-      }
+      }.tap do |hash|
+        hash[:emailNotification] = email_notification.to_h if email_notification
+      end
     end
   end
 end
