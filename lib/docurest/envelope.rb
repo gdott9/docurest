@@ -30,6 +30,8 @@ module Docurest
     field :status_at, :statusDateTime, :date_time
     field :status_changed_at, :statusChangedDateTime, :date_time
 
+    field :voided_reason, :voidedReason
+
     field :custom_fields, :customFields
 
     field :email_settings, :emailSettings, ->(value) { Docurest::Envelope::EmailSettings.new value }
