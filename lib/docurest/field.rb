@@ -45,7 +45,13 @@ module Docurest
 
         value.send("#{parent_field}=", guid) if parent_field
         value.id = values.length + 1 unless value.id
+
+        instance_variable_set(:"@#{klass}_changed", true)
+
         values << value
+      end
+      define_method("#{klass}_changed?") do
+        !!instance_variable_get(:"@#{klass}_changed")
       end
     end
   end

@@ -94,10 +94,13 @@ module Docurest
         emailSubject: emailSubject,
         emailBlurb: emailBlurb,
         emailSettings: emailSettings.to_h,
-        documents: documents.map(&:to_h),
-        recipients: Docurest::Base.hash_by_type(recipients),
-        files: files,
-      }
+      }.tap do |hash|
+        if documents_changed?
+          hash[:documents] = documents.map(&:to_h)
+          hash[:files] = files
+        end
+        hash[:recipients] = Docurest::Base.hash_by_type(recipients) if recipients_changed?
+      end
     end
 
     private
