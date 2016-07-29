@@ -8,10 +8,11 @@ module Docurest
       end
     end
 
+    field :id
     field :guid
     field :name
     field :type
-    field :tab_label, :tabLabel
+    field :label, :tabLabel
     field :scale_value, :scaleValue, :float
     field :optional, nil, :boolean
     field :required, nil, :boolean
