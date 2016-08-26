@@ -66,7 +66,7 @@ module Docurest
     end
 
     def fire
-      return unless status == 'created'
+      return unless status.nil? || status == 'created'
 
       if persisted?
         Docurest.client.put "/envelopes/#{guid}", {status: :sent}
