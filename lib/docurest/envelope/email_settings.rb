@@ -35,7 +35,8 @@ module Docurest
     def to_h
       {
         replyEmailAddressOverride: replyEmailAddressOverride,
-        replyEmailNameOverride: replyEmailNameOverride
+        replyEmailNameOverride: replyEmailNameOverride,
+        bccEmailAddresses: bccEmailAddresses
       }
     end
 
