@@ -35,6 +35,7 @@ module Docurest
     field :custom_fields, :customFields
 
     field :email_settings, :emailSettings, ->(value) { Docurest::Envelope::EmailSettings.new value }
+    field :event_notification, :eventNotification, ->(value) { Docurest::Envelope::EventNotification.new value }
 
     association(:recipients, :envelope_id) { Docurest::Envelope::Recipient.list(guid) }
     def save_recipients(resend: false)
@@ -94,6 +95,7 @@ module Docurest
         emailSubject: emailSubject,
         emailBlurb: emailBlurb,
         emailSettings: emailSettings.to_h,
+        eventNotification: eventNotification.to_h,
       }.tap do |hash|
         if documents_changed?
           hash[:documents] = documents.map(&:to_h)
